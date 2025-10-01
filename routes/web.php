@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::view('about', 'about')->name('about');
 
     Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+    Route::post('users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
 
       // Formulario para editar roles/permiso de un usuario
     Route::get('users/{user}/roles-permissions', [UserController::class, 'editRoles'])
@@ -28,6 +29,10 @@ Route::middleware('auth')->group(function () {
     // Guardar cambios
     Route::put('users/{user}/roles-permissions', [UserController::class, 'updateRoles'])
         ->name('users.roles.update');
+    
+    // Obtener datos de roles y permisos para el modal
+    Route::get('users/{user}/roles/data', [UserController::class, 'getRolesData'])
+        ->name('users.roles.data');
     
     Route::get('bitacora', [UserController::class, 'bitacora'])->name('bitacora.index');
 

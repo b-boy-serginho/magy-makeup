@@ -8,7 +8,8 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use App\Models\ActivityLog;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; 
 
 
 class UserController extends Controller
@@ -23,6 +24,32 @@ class UserController extends Controller
         $users = User::paginate();
 
         return view('users.index', compact('users'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        // Registrar en bitácora
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Creación de usuario',
+            'description' => 'Usuario creado: ' . $user->name . ' (' . $user->email . ')',
+        ]);
+
+        return redirect()
+            ->route('users.index')
+            ->with('status', 'Usuario creado correctamente.');
     }
 
     public function editRoles(User $user): View
@@ -98,6 +125,36 @@ class UserController extends Controller
         return redirect()
             ->route('users.index')
             ->with('status', 'Roles y permisos actualizados correctamente.');
+    }
+
+    public function getRolesData(User $user)
+    {
+        $roles = Role::orderBy('name')->get(['id', 'name']);
+        $permissions = Permission::orderBy('name')->get(['id', 'name']);
+        
+        $userRoleIds = $user->roles->pluck('id')->toArray();
+        $userPermissionIds = $user->permissions->pluck('id')->toArray();
+        
+        $rolesData = $roles->map(function ($role) use ($userRoleIds) {
+            return [
+                'id' => $role->id,
+                'name' => $role->name,
+                'assigned' => in_array($role->id, $userRoleIds)
+            ];
+        });
+        
+        $permissionsData = $permissions->map(function ($permission) use ($userPermissionIds) {
+            return [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'assigned' => in_array($permission->id, $userPermissionIds)
+            ];
+        });
+        
+        return response()->json([
+            'roles' => $rolesData,
+            'permissions' => $permissionsData
+        ]);
     }
 
    public function bitacora(Request $request): View
