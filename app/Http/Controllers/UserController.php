@@ -26,6 +26,12 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
+    public function show(User $user): View
+    {
+        $user->load('roles', 'permissions');
+        return view('users.show', compact('user'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -52,6 +58,57 @@ class UserController extends Controller
             ->with('status', 'Usuario creado correctamente.');
     }
 
+    public function edit(User $user): View
+    {
+        return view('users.edit', compact('user'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $updateData = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ];
+
+        if (!empty($data['password'])) {
+            $updateData['password'] = Hash::make($data['password']);
+        }
+
+        $user->update($updateData);
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Actualización de usuario',
+            'description' => 'Usuario actualizado: ' . $user->name . ' (' . $user->email . ')',
+        ]);
+
+        return redirect()->route('users.index')
+            ->with('status', 'Usuario actualizado correctamente.');
+    }
+
+    public function destroy(User $user)
+    {
+        $userName = $user->name;
+        $userEmail = $user->email;
+        
+        $user->delete();
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Eliminación de usuario',
+            'description' => 'Usuario eliminado: ' . $userName . ' (' . $userEmail . ')',
+        ]);
+
+        return redirect()->route('users.index')
+            ->with('status', 'Usuario eliminado correctamente.');
+    }
+
     public function editRoles(User $user): View
     {
         // Listas para checkboxes
@@ -67,7 +124,7 @@ class UserController extends Controller
         ));
     }
 
- public function updateRoles(Request $request, User $user)
+    public function updateRoles(Request $request, User $user)
     {
         // 1) Validación y normalización
         $data = $request->validate([

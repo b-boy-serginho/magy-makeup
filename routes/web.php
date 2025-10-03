@@ -3,6 +3,8 @@
 use App\Http\Controllers\BookController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -19,22 +21,23 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::middleware('auth')->group(function () {
     Route::view('about', 'about')->name('about');
 
-    Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
-    Route::post('users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
-
-      // Formulario para editar roles/permiso de un usuario
+    // Rutas de usuarios
+    Route::resource('users', UserController::class);
+    
+    // Rutas específicas para usuarios
     Route::get('users/{user}/roles-permissions', [UserController::class, 'editRoles'])
         ->name('users.roles.edit');
-
-    // Guardar cambios
     Route::put('users/{user}/roles-permissions', [UserController::class, 'updateRoles'])
         ->name('users.roles.update');
-    
-    // Obtener datos de roles y permisos para el modal
     Route::get('users/{user}/roles/data', [UserController::class, 'getRolesData'])
         ->name('users.roles.data');
-    
     Route::get('bitacora', [UserController::class, 'bitacora'])->name('bitacora.index');
+    
+    // Rutas de roles
+    Route::resource('roles', RoleController::class);
+    
+    // Rutas de permisos
+    Route::resource('permissions', PermissionController::class);
 
 
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

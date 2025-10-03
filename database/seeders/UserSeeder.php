@@ -15,10 +15,13 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Permission::create(['name' => 'mostrar usuarios']);
         Permission::create(['name' => 'ver usuarios']);
         Permission::create(['name' => 'crear usuarios']);
         Permission::create(['name' => 'editar usuarios']);
-        Permission::create(['name' => 'eliminar usuarios']);
+        // Permission::create(['name' => 'eliminar usuarios']);
+        // Permission::create(['name' => 'asignar']);
+
 // ---------------------------------------------------------------
         // Permission::create(['name' => 'ver libros']);
         // Permission::create(['name' => 'crear libros']);
