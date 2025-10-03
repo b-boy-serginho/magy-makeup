@@ -59,13 +59,13 @@
                             MAGY MAKEUP
                     </a>
                 </a>
-                <ul class="header-nav d-none d-md-flex">
+                {{-- <ul class="header-nav d-none d-md-flex">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('home') }}" style="color:#212529; font-weight:600; font-size:1.2rem;">
                             MAGY MAKEUP
                         </a>
                     </li>
-                </ul>
+                </ul> --}}
                 <ul class="header-nav ms-auto">
 
                 </ul>

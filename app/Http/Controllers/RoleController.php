@@ -56,6 +56,8 @@ class RoleController extends Controller
             'user_id' => Auth::id(),
             'action' => 'Creación de rol',
             'description' => 'Rol creado: "' . $role->name . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('roles.index')
@@ -107,6 +109,8 @@ class RoleController extends Controller
             'user_id' => Auth::id(),
             'action' => 'Actualización de rol',
             'description' => 'Rol actualizado: "' . $role->name . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('roles.index')
@@ -116,7 +120,7 @@ class RoleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Role $role)
+    public function destroy(Request $request, Role $role)
     {
         // Verificar si el rol tiene usuarios asignados
         if ($role->users()->count() > 0) {
@@ -137,6 +141,8 @@ class RoleController extends Controller
             'user_id' => Auth::id(),
             'action' => 'Eliminación de rol',
             'description' => 'Rol eliminado: "' . $roleName . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('roles.index')

@@ -45,10 +45,13 @@ class PermissionController extends Controller
             'guard_name' => 'web'
         ]);
 
+        // Registrar en bitácora
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Creación de permiso',
             'description' => 'Permiso creado: "' . $permission->name . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('permissions.index')
@@ -83,10 +86,13 @@ class PermissionController extends Controller
 
         $permission->update(['name' => $data['name']]);
 
+        // Registrar en bitácora
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Actualización de permiso',
             'description' => 'Permiso actualizado: "' . $permission->name . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('permissions.index')
@@ -96,16 +102,19 @@ class PermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Permission $permission)
+    public function destroy(Request $request, Permission $permission)
     {
         $permissionName = $permission->name;
         
         $permission->delete();
 
+        // Registrar en bitácora
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Eliminación de permiso',
             'description' => 'Permiso eliminado: "' . $permissionName . '"',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('permissions.index')
