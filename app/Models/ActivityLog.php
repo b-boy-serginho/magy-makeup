@@ -10,7 +10,7 @@ class ActivityLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'action', 'description'];
+    protected $fillable = ['user_id', 'action', 'description', 'ip_address', 'browser'];
 
     // Definir la relación con el modelo User
     public function user()

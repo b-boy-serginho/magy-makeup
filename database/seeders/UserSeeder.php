@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         // Permission::create(['name' => 'mostrar usuarios']);
         Permission::create(['name' => 'ver usuarios']);
         Permission::create(['name' => 'crear usuarios']);
-        Permission::create(['name' => 'editar usuarios']);
+        // Permission::create(['name' => 'editar usuarios']);
         // Permission::create(['name' => 'eliminar usuarios']);
         // Permission::create(['name' => 'asignar']);
 
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
 
         $adminUser = User::query()->create([
             'name' => 'admin',
-            'email' => 'admin@admin.com',
+            'email' => 'admin@gmail.com',
             'password' => '12345',
             'email_verified_at' => now()
         ]);
@@ -59,7 +59,6 @@ class UserSeeder extends Seeder
             'password' => '12345',
             'email_verified_at' => now()
         ]);
-
 
         $roleCliente = Role::create(['name' => 'cliente']);
         $clienteUser->assignRole($roleCliente);        

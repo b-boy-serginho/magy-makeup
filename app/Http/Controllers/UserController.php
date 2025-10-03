@@ -11,7 +11,6 @@ use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash; 
 
-
 class UserController extends Controller
 {
     public function __construct()
@@ -22,7 +21,6 @@ class UserController extends Controller
     public function index(): View
     {
         $users = User::paginate();
-
         return view('users.index', compact('users'));
     }
 
@@ -51,6 +49,8 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'action' => 'Creación de usuario',
             'description' => 'Usuario creado: ' . $user->name . ' (' . $user->email . ')',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()
@@ -82,10 +82,13 @@ class UserController extends Controller
 
         $user->update($updateData);
 
+        // Registrar en bitácora
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Actualización de usuario',
             'description' => 'Usuario actualizado: ' . $user->name . ' (' . $user->email . ')',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('users.index')
@@ -99,10 +102,13 @@ class UserController extends Controller
         
         $user->delete();
 
+        // Registrar en bitácora
         ActivityLog::create([
             'user_id' => Auth::id(),
             'action' => 'Eliminación de usuario',
             'description' => 'Usuario eliminado: ' . $userName . ' (' . $userEmail . ')',
+            'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+            'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
         ]);
 
         return redirect()->route('users.index')
@@ -126,7 +132,7 @@ class UserController extends Controller
 
     public function updateRoles(Request $request, User $user)
     {
-        // 1) Validación y normalización
+        // Validación y normalización
         $data = $request->validate([
             'roles' => ['nullable','array'],
             'roles.*' => ['integer', 'exists:roles,id'],
@@ -137,22 +143,22 @@ class UserController extends Controller
         $newRoleIds = $data['roles'] ?? [];
         $newPermIds = $data['permissions'] ?? [];
 
-        // 2) Snapshot ANTES de sincronizar
+        // Snapshot antes de sincronizar
         $oldRoleIds = $user->roles()->pluck('id')->toArray();
         $oldPermIds = $user->permissions()->pluck('id')->toArray();
 
-        // 3) Sincronizar usando el guard correcto (ajusta si tu guard no es 'web')
+        // Sincronizar roles y permisos
         $roles = Role::whereIn('id', $newRoleIds)->where('guard_name', 'web')->get();
         $perms = Permission::whereIn('id', $newPermIds)->where('guard_name', 'web')->get();
 
         $user->syncRoles($roles);
         $user->syncPermissions($perms);
 
-        // 4) Detectar cambios reales
+        // Detectar cambios
         $rolesChanged = $this->idsChanged($oldRoleIds, $newRoleIds);
         $permsChanged = $this->idsChanged($oldPermIds, $newPermIds);
 
-        // 5) Registrar en bitácora si hubo cambios
+        // Registrar en bitácora si hubo cambios
         if ($rolesChanged || $permsChanged) {
             $detalles = [];
 
@@ -176,6 +182,8 @@ class UserController extends Controller
                 'user_id'     => Auth::id(),
                 'action'      => 'Actualización de roles/permisos',
                 'description' => 'Usuario afectado: '.$user->name.' | '.implode(' | ', $detalles),
+                'ip_address' => $request->ip() ?? 'No disponible',            // Guardar IP (con valor predeterminado)
+                'browser' => $request->header('user-agent') ?? 'No disponible', // Guardar navegador (con valor predeterminado)
             ]);
         }
 
@@ -214,7 +222,7 @@ class UserController extends Controller
         ]);
     }
 
-   public function bitacora(Request $request): View
+    public function bitacora(Request $request): View
     {
         $activityLogs = ActivityLog::with('user')
             ->when($request->filled('action'), function($query) use ($request) {

@@ -6,7 +6,7 @@
             {{ __('Dashboard') }}
         </div>
         <div class="card-body">
-            {{ __('You are logged in!') }}
+            {{ __('Bienvenido Usuario a nuestro sistema') }}
         </div>
     </div>
 @endsection

@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('ip_address');
             $table->string('action');
-            $table->text('description');
-
+            $table->text('description');             
+            $table->text('browser');
             $table->timestamps();
         });
     }
