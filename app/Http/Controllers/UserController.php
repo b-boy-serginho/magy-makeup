@@ -95,7 +95,7 @@ class UserController extends Controller
             ->with('status', 'Usuario actualizado correctamente.');
     }
 
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
         $userName = $user->name;
         $userEmail = $user->email;
